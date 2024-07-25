@@ -14,7 +14,7 @@ Il s'agit d'une application de gestion de tâches full-stack construite avec un 
 ### Étape 1 : Cloner le Dépôt
 
 ```bash
-git clone <URL_DU_DÉPÔT>
+git clone https://github.com/Killianlch/Task-Manager.git
 cd task-manager
 ```
 
