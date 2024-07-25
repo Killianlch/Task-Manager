@@ -1,4 +1,3 @@
-```markdown
 # Application de Gestion de Tâches
 
 ## Introduction
