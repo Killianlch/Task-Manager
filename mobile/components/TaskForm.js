@@ -9,7 +9,7 @@ const TaskForm = ({ fetchTasks }) => {
 
   const handleSubmit = async () => {
     try {
-      await axios.post('http://localhost:5000/tasks', { title, description });
+      await axios.post('http://192.168.1.185:5001/tasks', { title, description });
       fetchTasks();
       setTitle('');
       setDescription('');
