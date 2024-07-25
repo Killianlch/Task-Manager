@@ -357,6 +357,3 @@ volumes:
 ### Remarque
 
 Assurez-vous que votre backend est accessible à partir de l'application mobile. Si vous testez sur un appareil physique, remplacez `localhost` par l'adresse IP de votre machine de développement.
-```
-
-Vous pouvez copier et coller ce contenu directement dans votre fichier `README.md`. Si vous avez des questions ou avez besoin d'aide supplémentaire, n'hésitez pas à demander.
