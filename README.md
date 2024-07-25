@@ -1,70 +1,171 @@
-# Getting Started with Create React App
+```markdown
+# Application de Gestion de Tâches
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Introduction
 
-## Available Scripts
+Il s'agit d'une application de gestion de tâches full-stack construite avec un frontend React, un backend Express et MongoDB comme base de données. L'application est conteneurisée à l'aide de Docker.
 
-In the project directory, you can run:
+## Prérequis
 
-### `npm start`
+- Docker et Docker Compose installés sur votre machine
+- Git installé sur votre machine
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Démarrage
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Étape 1 : Cloner le Dépôt
 
-### `npm test`
+```bash
+git clone <URL_DU_DÉPÔT>
+cd task-manager
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Étape 2 : Configuration des Conteneurs Docker
 
-### `npm run build`
+Assurez-vous que les fichiers `Dockerfile` et `docker-compose.yml` sont correctement configurés.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+#### Dockerfile pour le Backend
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Créez un fichier `Dockerfile` dans le répertoire `backend/` avec le contenu suivant :
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```Dockerfile
+# Utiliser une image Node officielle comme image de base
+FROM node:14
 
-### `npm run eject`
+# Définir le répertoire de travail dans le conteneur
+WORKDIR /app
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+# Copier les fichiers package.json et package-lock.json dans le répertoire de travail
+COPY package*.json ./
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+# Installer les dépendances de l'application
+RUN npm install
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+# Copier le reste des fichiers de l'application dans le répertoire de travail
+COPY . .
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+# Exposer le port sur lequel l'application va écouter
+EXPOSE 5000
 
-## Learn More
+# Définir la commande pour démarrer l'application
+CMD ["node", "server.js"]
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+#### Dockerfile pour le Frontend
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Créez un fichier `Dockerfile` dans le répertoire `frontend/` avec le contenu suivant :
 
-### Code Splitting
+```Dockerfile
+# Utiliser une image Node officielle comme image de base
+FROM node:14
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+# Définir le répertoire de travail dans le conteneur
+WORKDIR /app
 
-### Analyzing the Bundle Size
+# Copier les fichiers package.json et package-lock.json dans le répertoire de travail
+COPY package*.json ./
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+# Installer les dépendances de l'application
+RUN npm install
 
-### Making a Progressive Web App
+# Copier le reste des fichiers de l'application dans le répertoire de travail
+COPY . .
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+# Exposer le port sur lequel l'application va écouter
+EXPOSE 3000
 
-### Advanced Configuration
+# Définir la commande pour démarrer l'application
+CMD ["npm", "start"]
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+#### docker-compose.yml
 
-### Deployment
+Créez un fichier `docker-compose.yml` à la racine de votre projet avec le contenu suivant :
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```yaml
+version: '3.8'
 
-### `npm run build` fails to minify
+services:
+  backend:
+    build: ./backend
+    container_name: task_manager_backend
+    restart: unless-stopped
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/taskmanager
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+  frontend:
+    build: ./frontend
+    container_name: task_manager_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
+```
+
+### Étape 3 : Construire et Démarrer les Conteneurs Docker
+
+1. **Arrêter les conteneurs en cours d'exécution (s'il y en a) :**
+   ```bash
+   docker-compose down
+   ```
+
+2. **Construire et démarrer les conteneurs :**
+   ```bash
+   docker-compose up --build
+   ```
+
+3. **Surveiller les logs en temps réel pour identifier tout problème :**
+   ```bash
+   docker-compose logs -f
+   ```
+
+### Étape 4 : Tester l'API Backend
+
+1. **Utiliser `curl` pour tester l'API backend :**
+
+   - Récupérer les tâches :
+     ```bash
+     curl http://localhost:5000/tasks
+     ```
+
+   - Ajouter une tâche :
+     ```bash
+     curl -X POST -H "Content-Type: application/json" -d '{"title": "New Task", "description": "Task description"}' http://localhost:5000/tasks
+     ```
+
+   - Mettre à jour une tâche :
+     ```bash
+     curl -X PUT -H "Content-Type: application/json" -d '{"title": "Updated Task", "description": "Updated description"}' http://localhost:5000/tasks/<task_id>
+     ```
+
+   - Supprimer une tâche :
+     ```bash
+     curl -X DELETE http://localhost:5000/tasks/<task_id>
+     ```
+
+### Étape 5 : Accéder au Frontend
+
+1. **Ouvrez votre navigateur et accédez à :**
+   ```http://localhost:3000```
+
+### Remarques
+
+- Assurez-vous que les ports `5000` et `3000` ne sont pas utilisés par d'autres services sur votre machine.
+- Si vous rencontrez des problèmes de connexion, vérifiez les logs des conteneurs avec `docker-compose logs`.
+
+En suivant ces étapes, vous devriez être en mesure de cloner le dépôt, configurer les conteneurs Docker, et lancer l'application de gestion de tâches.
+```
